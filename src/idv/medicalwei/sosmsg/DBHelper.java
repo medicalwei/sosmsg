@@ -2,66 +2,35 @@ package idv.medicalwei.sosmsg;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
-    public SQLiteDatabase DB;
-    public String DBPath;
-    public static String DBName = "sosmsg";
-    public static final int version = '3';
+    public static String DATABASE_NAME = "sosmsg";
+    private static final int DATABASE_VERSION = 4; 
     public static Context currentContext;
     public static String tableName = "messages";
-    private boolean dbExists;
 
 	public DBHelper(Context context) {
-		super(context, DBName, null, version);
-        currentContext = context;
-        DBPath = context.getFilesDir().toString();
-        dbExists = checkDbExists();
-        createDatabase();
-    }
-	 
-    private void createDatabase() {
-        if (dbExists) {
-            // do nothing
-        } else {
-            DB = currentContext.openOrCreateDatabase(DBName, 0, null);
-            DB.execSQL("CREATE TABLE IF NOT EXISTS " +
-                    tableName +
-                    " (name VARCHAR, status INTEGER, message TEXT" +
-                    " lat REAL, lon REAL, timestamp DATETIME);");
-        }
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
     
 	@Override
-	public void onCreate(SQLiteDatabase arg0) {
-		// TODO Auto-generated method stub
-
+	public void onCreate(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + tableName +
+                " (name VARCHAR, status INTEGER, message TEXT" +
+                " lat REAL, lon REAL, timestamp DATETIME);");
 	}
 
 	@Override
-	public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
-
+	public void onUpgrade(SQLiteDatabase db, int oldVer, int newVer) {
+		db.execSQL("DROP TABLE IF EXISTS " + tableName);
+		onCreate(db);
 	} 
 	
-    private boolean checkDbExists() {
-        SQLiteDatabase checkDB = null;
- 
-        try {
-            String myPath = DBPath + "/" + DBName;
-            checkDB = SQLiteDatabase.openDatabase(myPath, null,
-                    SQLiteDatabase.OPEN_READONLY);
-        } catch (SQLiteException e) {
-            // database does't exist yet.
-        }
- 
-        if (checkDB != null) {
-            checkDB.close();
-        }
- 
-        return checkDB != null;
-    }
+	@Override
+	public void onDowngrade(SQLiteDatabase db, int oldVer, int newVer) {
+		db.execSQL("DROP TABLE IF EXISTS " + tableName);
+		onCreate(db);
+	} 
 
 }

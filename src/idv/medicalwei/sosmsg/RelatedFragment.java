@@ -34,11 +34,12 @@ public class RelatedFragment extends ListFragment {
     }
     
     private void openAndQueryDatabase() {
+    	results.clear();
         try {
             DBHelper dbHelper = new DBHelper(this.getActivity());
             newDB = dbHelper.getWritableDatabase();
             Cursor c = newDB.rawQuery("SELECT name, status, message, timestamp FROM " +
-                    tableName + "SORT BY status, timestamp ", null);
+                    tableName + " ORDER BY status, timestamp;", null);
             String[] statusStrings = getResources().getStringArray(R.array.status_array);
             if (c != null ) {
                 if  (c.moveToFirst()) {
@@ -49,13 +50,12 @@ public class RelatedFragment extends ListFragment {
                         results.add("[" + status + "] " + name + " " + message);
                     }while (c.moveToNext());
                 }
-            }          
+                c.close();
+            }
         } catch (SQLiteException se ) {
             Log.e(getClass().getSimpleName(), "Could not create or Open the database");
         } finally {
-            if (newDB != null)
-                newDB.execSQL("DELETE FROM " + tableName);
-                newDB.close();
+            newDB.close();
         }
  
     }

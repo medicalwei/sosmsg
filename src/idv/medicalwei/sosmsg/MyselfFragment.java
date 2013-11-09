@@ -1,5 +1,6 @@
 package idv.medicalwei.sosmsg;
 import idv.medicalwei.sosmsg.R;
+import android.content.ContentValues;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Spinner;
 
     /**
@@ -40,19 +42,15 @@ import android.widget.Spinner;
                 DBHelper dbHelper = new DBHelper(this.getActivity());
                 newDB = dbHelper.getWritableDatabase();
 
-            	String name = DatabaseUtils.sqlEscapeString(getView().findViewById(R.id.userName).getContext().toString());
-            	String message = DatabaseUtils.sqlEscapeString(getView().findViewById(R.id.message).getContext().toString());
-            	Integer status = ((Spinner) getView().findViewById(R.id.status)).getSelectedItemPosition();
-
-                newDB.rawQuery("INSERT INTO " +
-                        tableName + " (name, message, status) VALUES (" + 
-                		name + ", " + message + "," + status + ");", null);
+                ContentValues values = new ContentValues();
+                values.put("name", ((EditText) getView().findViewById(R.id.userName)).getText().toString());
+                values.put("message", ((EditText) getView().findViewById(R.id.message)).getText().toString());
+                values.put("status", ((Spinner) getView().findViewById(R.id.status)).getSelectedItemPosition());
+                newDB.insert(tableName, null, values);
             } catch (SQLiteException se ) {
                 Log.e(getClass().getSimpleName(), "Could not create or Open the database");
             } finally {
-                if (newDB != null)
-                    newDB.execSQL("DELETE FROM " + tableName);
-                    newDB.close();
+                newDB.close();
             }
      
 
