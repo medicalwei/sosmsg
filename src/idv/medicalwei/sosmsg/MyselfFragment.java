@@ -1,7 +1,6 @@
 package idv.medicalwei.sosmsg;
 import idv.medicalwei.sosmsg.R;
 import android.content.ContentValues;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
@@ -10,8 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.TextView;
 
     /**
      * A dummy fragment representing a section of the app, but that simply
@@ -28,6 +26,7 @@ import android.widget.Spinner;
         public static final String ARG_SECTION_NUMBER = "section_number";
 
         public MyselfFragment() {
+        	
         }
 
         @Override
@@ -39,20 +38,19 @@ import android.widget.Spinner;
         
         public void updateMessage(){
             try {
-                DBHelper dbHelper = new DBHelper(this.getActivity());
+                DBHelper dbHelper = new DBHelper((MainActivity) this.getActivity());
                 newDB = dbHelper.getWritableDatabase();
 
-                ContentValues values = new ContentValues();
-                values.put("name", ((EditText) getView().findViewById(R.id.userName)).getText().toString());
-                values.put("message", ((EditText) getView().findViewById(R.id.message)).getText().toString());
-                values.put("status", ((Spinner) getView().findViewById(R.id.status)).getSelectedItemPosition());
-                newDB.insert(tableName, null, values);
+                SOSMessage message = new SOSMessage(DBHelper.appid, getView());
+                ContentValues values = message.toValues();
+                if (newDB.update(tableName, values, "appid=\'" + values.getAsString("appid") + "\'", null) <= 0){
+                	newDB.insert(tableName, null, values);
+                }
+                ((TextView) getActivity().findViewById(R.id.app_status)).setText(R.string.string_message_updated);
             } catch (SQLiteException se ) {
                 Log.e(getClass().getSimpleName(), "Could not create or Open the database");
             } finally {
                 newDB.close();
             }
-     
-
         }
     }

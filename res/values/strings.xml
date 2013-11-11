@@ -20,7 +20,8 @@
     <string name="string_help_me">HELP ME!</string>
     <string name="string_need_supply">Need Supply</string>
     <string name="string_rescued">Rescued</string>
+    <string name="string_message_updated">Message Updated</string>
     <string name="action_refresh">Refresh</string>
-        
     
+    <string name="string_message_count">%d messages loaded</string>
 </resources>

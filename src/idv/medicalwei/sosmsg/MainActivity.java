@@ -1,15 +1,24 @@
 package idv.medicalwei.sosmsg;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,11 +43,35 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	MyselfFragment mMyselfFragment;
 	RelatedFragment mRelatedFragment;
 
+	WifiP2pManager mManager;
+	Channel mChannel;
+	BroadcastReceiver mReceiver;
+
+	IntentFilter mIntentFilter;
+	
+	String appid;
+
+	private String generateAppId(SharedPreferences preferences) {
+		SecureRandom random = new SecureRandom();
+		String newAppid = new BigInteger(130, random).toString(32);
+		SharedPreferences.Editor prefEditor = preferences.edit();
+		prefEditor.putString("appid", newAppid);
+		prefEditor.commit();
+		return newAppid;
+	}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+    	SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        if(preferences.contains("appid")){
+        	appid = preferences.getString("appid", null);
+        } else {
+        	appid = generateAppId(preferences);
+        }
+        Log.d("appid", appid);
 
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
@@ -73,6 +106,16 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
+        
+        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(this, getMainLooper(), null);
+        mReceiver = new MessageClient(mManager, mChannel, this);
+
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
     }
 
     @Override
@@ -149,5 +192,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     public void updateMessage(View view){
     	mMyselfFragment.updateMessage();
+    }
+    
+    /* register the broadcast receiver with the intent values to be matched */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mReceiver, mIntentFilter);
+    }
+    
+    /* unregister the broadcast receiver */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mReceiver);
     }
 }

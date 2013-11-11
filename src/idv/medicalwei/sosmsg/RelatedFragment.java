@@ -2,6 +2,7 @@ package idv.medicalwei.sosmsg;
 
 import java.util.ArrayList;
 
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 public class RelatedFragment extends ListFragment {
     private ArrayList<String> results = new ArrayList<String>();
@@ -36,11 +38,12 @@ public class RelatedFragment extends ListFragment {
     private void openAndQueryDatabase() {
     	results.clear();
         try {
-            DBHelper dbHelper = new DBHelper(this.getActivity());
+            DBHelper dbHelper = new DBHelper((MainActivity) this.getActivity());
             newDB = dbHelper.getWritableDatabase();
             Cursor c = newDB.rawQuery("SELECT name, status, message, timestamp FROM " +
                     tableName + " ORDER BY status, timestamp;", null);
             String[] statusStrings = getResources().getStringArray(R.array.status_array);
+            Log.d("query count", Integer.valueOf(c.getCount()).toString());
             if (c != null ) {
                 if  (c.moveToFirst()) {
                     do {
@@ -50,6 +53,10 @@ public class RelatedFragment extends ListFragment {
                         results.add("[" + status + "] " + name + " " + message);
                     }while (c.moveToNext());
                 }
+                Resources res = getResources();
+                String text = String.format(res.getString(R.string.string_message_count), c.getCount());
+                ((TextView) getActivity().findViewById(R.id.app_status)).setText(text);
+
                 c.close();
             }
         } catch (SQLiteException se ) {
