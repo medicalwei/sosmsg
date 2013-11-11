@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+        
+<LinearLayout
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -41,9 +46,9 @@
     <EditText
         android:id="@+id/message"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:ems="10"
+        android:gravity="start"
         android:hint="@string/string_message"
         android:inputType="textMultiLine" />
 
@@ -65,3 +70,5 @@
         android:layout_height="wrap_content" />
 
 </LinearLayout>
+
+    </ScrollView>
