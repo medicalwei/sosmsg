@@ -4,7 +4,6 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -16,11 +15,13 @@ public class MessageServerAsyncTask extends AsyncTask<Void, Void, Void> {
     private TextView statusText;
 	private SQLiteDatabase db;
 	private String tableName;
+	private MainActivity activity;
 
-    public MessageServerAsyncTask(Activity activity, View statusText) {
+    public MessageServerAsyncTask(MainActivity activity, View statusText) {
+    	this.activity = activity;
         this.statusText = (TextView) statusText;
         this.tableName = DBHelper.tableName; 
-        this.db = new DBHelper((MainActivity) activity).getWritableDatabase();
+        this.db = new DBHelper(activity).getWritableDatabase();
     }
 
     protected Void doInBackground(Void... params) {
@@ -42,6 +43,8 @@ public class MessageServerAsyncTask extends AsyncTask<Void, Void, Void> {
             }
             
             serverSocket.close();
+            activity.updateMessage();
+
         } catch (Exception e) {
 			e.printStackTrace();
 		}

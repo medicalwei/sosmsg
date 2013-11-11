@@ -189,6 +189,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     	mRelatedFragment.refreshResultList();
 		return true;
     }
+    
+    public void updateMessage(){
+    	mMyselfFragment.updateMessage();
+    }
 
     public void updateMessage(View view){
     	mMyselfFragment.updateMessage();
